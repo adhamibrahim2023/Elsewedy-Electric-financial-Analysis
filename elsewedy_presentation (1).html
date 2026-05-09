@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elsewedy Electric — Financial Performance Analysis 2015 vs 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C878;
+    --gold-dim: #8A6E2F;
+    --dark: #0A0A0F;
+    --dark-2: #111119;
+    --dark-3: #1A1A26;
+    --dark-4: #22223A;
+    --surface: #16162A;
+    --surface-2: #1E1E35;
+    --text: #F0EDE8;
+    --text-muted: #9896A8;
+    --text-dim: #5A5870;
+    --accent-teal: #2DD4BF;
+    --accent-coral: #F97316;
+    --accent-blue: #60A5FA;
+    --accent-red: #F87171;
+    --accent-green: #4ADE80;
+    --border: rgba(201,168,76,0.15);
+    --border-bright: rgba(201,168,76,0.4);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 2rem;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(45,212,191,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 20% 60%, rgba(96,165,250,0.05) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 0%, transparent 100%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 900px;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-bright);
+    padding: 6px 18px;
+    border-radius: 100px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .hero-tag::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 1rem;
+    animation: fadeDown 0.8s 0.1s ease both;
+  }
+
+  .hero-title .gold { color: var(--gold); }
+
+  .hero-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-bottom: 3rem;
+    animation: fadeDown 0.8s 0.2s ease both;
+  }
+
+  .hero-years {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 4rem;
+    animation: fadeDown 0.8s 0.3s ease both;
+  }
+
+  .year-chip {
+    padding: 0.75rem 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .year-chip.y2015 { color: var(--accent-blue); border-color: rgba(96,165,250,0.4); }
+  .year-chip.y2025 { color: var(--gold); border-color: var(--border-bright); background: rgba(201,168,76,0.05); }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    animation: fadeIn 1s 1s ease both;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--gold-dim), transparent);
+    animation: scrollPulse 2s infinite;
+  }
+
+  @keyframes scrollPulse {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ─── NAV ─── */
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 3rem;
+    background: rgba(10,10,15,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    transform: translateY(-100%);
+    transition: transform 0.4s ease;
+  }
+
+  .nav.visible { transform: translateY(0); }
+
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  /* ─── SECTIONS ─── */
+  section {
+    padding: 6rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 30px;
+    height: 1px;
+    background: var(--gold-dim);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    margin-bottom: 3rem;
+    line-height: 1.1;
+  }
+
+  /* ─── OVERVIEW STRIP ─── */
+  .overview-strip {
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2rem;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .kpi-item {
+    padding: 2rem 2.5rem;
+    border-right: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-item:last-child { border-right: none; }
+
+  .kpi-item::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .kpi-item:hover::before { opacity: 1; }
+
+  .kpi-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .kpi-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    margin-top: 0.5rem;
+    padding: 2px 8px;
+    border-radius: 100px;
+  }
+
+  .kpi-delta.up { background: rgba(74,222,128,0.1); color: var(--accent-green); }
+  .kpi-delta.down { background: rgba(248,113,113,0.1); color: var(--accent-red); }
+
+  /* ─── CHART SECTION ─── */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+
+  .chart-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .chart-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-bright);
+  }
+
+  .chart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .chart-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .charts-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .charts-3col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 900px) {
+    .charts-2col, .charts-3col { grid-template-columns: 1fr; }
+    .nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+  }
+
+  /* ─── LEGEND ─── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  /* ─── COMPARISON TABLE ─── */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .comp-table th {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .comp-table th.gold-col { color: var(--gold); }
+  .comp-table th.blue-col { color: var(--accent-blue); }
+
+  .comp-table td {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid rgba(201,168,76,0.06);
+    transition: background 0.2s;
+  }
+
+  .comp-table tr:hover td { background: rgba(201,168,76,0.03); }
+
+  .comp-table .metric-name {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .comp-table .val-2015 {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent-blue);
+    font-size: 13px;
+  }
+
+  .comp-table .val-2025 {
+    font-family: 'Space Mono', monospace;
+    color: var(--gold);
+    font-size: 13px;
+  }
+
+  .trend-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .trend-badge.improved { background: rgba(74,222,128,0.1); color: var(--accent-green); }
+  .trend-badge.declined { background: rgba(248,113,113,0.1); color: var(--accent-red); }
+  .trend-badge.mixed { background: rgba(251,191,36,0.1); color: #FBbf24; }
+
+  /* ─── VERDICT ─── */
+  .verdict-section {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 16px;
+    padding: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .verdict-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .verdict-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 700px) { .verdict-grid { grid-template-columns: 1fr; } }
+
+  .verdict-card {
+    background: var(--dark-3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+  }
+
+  .verdict-card h4 {
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .verdict-card h4.positive { color: var(--accent-green); }
+  .verdict-card h4.negative { color: var(--accent-red); }
+
+  .verdict-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .verdict-list li {
+    font-size: 14px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+  }
+
+  .verdict-list li::before {
+    content: '─';
+    color: var(--text-dim);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .invest-rec {
+    margin-top: 3rem;
+    padding: 2.5rem;
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 10px;
+    background: rgba(201,168,76,0.04);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .invest-icon {
+    font-size: 3rem;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid var(--border-bright);
+    display: grid;
+    place-items: center;
+    background: rgba(201,168,76,0.08);
+  }
+
+  /* ─── DIVIDERS ─── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── FLOATING LABELS ─── */
+  .float-label {
+    position: absolute;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    pointer-events: none;
+  }
+
+  /* ─── RADAR PLACEHOLDER ─── */
+  .radar-wrap {
+    position: relative;
+    width: 100%;
+    height: 320px;
+  }
+
+  /* ─── SECTION DIVIDERS ─── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .section-divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-divider-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--gold-dim);
+  }
+
+  /* ─── 3D CARD ─── */
+  .card-3d {
+    transition: transform 0.3s, box-shadow 0.3s;
+    transform-style: preserve-3d;
+  }
+
+  .card-3d:hover {
+    transform: perspective(800px) rotateX(-2deg) rotateY(1deg) translateY(-4px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.2);
+  }
+
+  /* ─── ANIMATE IN ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* ─── PROGRESS BARS ─── */
+  .progress-bar-wrap {
+    margin-bottom: 1.25rem;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+
+  .progress-label { color: var(--text-muted); }
+  .progress-val { font-family: 'Space Mono', monospace; font-size: 12px; }
+
+  .progress-track {
+    height: 4px;
+    background: var(--dark-4);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <div class="nav-logo">ELSWESDY · ELECTRIC</div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#liquidity">Liquidity</a></li>
+    <li><a href="#leverage">Leverage</a></li>
+    <li><a href="#profitability">Profitability</a></li>
+    <li><a href="#verdict">Verdict</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Financial Performance Analysis · Cairo University</div>
+    <h1 class="hero-title">
+      <span class="gold">Elsewedy</span><br>Electric
+    </h1>
+    <p class="hero-subtitle">A Comparative Study of Financial Performance</p>
+    <div class="hero-years">
+      <div class="year-chip y2015">2015</div>
+      <div style="display:flex;align-items:center;color:var(--text-dim);font-size:1.5rem;">→</div>
+      <div class="year-chip y2025">2025</div>
+    </div>
+    <p style="color:var(--text-dim);font-size:13px;letter-spacing:0.1em;">Founded 1938 · Listed EGX 2006 · 40+ Countries · 100+ Export Markets</p>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</div>
+
+<!-- KPI STRIP -->
+<div class="overview-strip" id="overview">
+  <div class="kpi-grid">
+    <div class="kpi-item reveal">
+      <div class="kpi-label">Revenue 2025</div>
+      <div class="kpi-value">281B</div>
+      <div class="kpi-sub">Egyptian Pounds</div>
+      <div class="kpi-delta up">↑ 1,267% vs 2015</div>
+    </div>
+    <div class="kpi-item reveal reveal-delay-1">
+      <div class="kpi-label">Net Profit 2025</div>
+      <div class="kpi-value">19.2B</div>
+      <div class="kpi-sub">EGP after tax</div>
+      <div class="kpi-delta up">↑ from 1.35B</div>
+    </div>
+    <div class="kpi-item reveal reveal-delay-2">
+      <div class="kpi-label">Total Assets 2025</div>
+      <div class="kpi-value">311B</div>
+      <div class="kpi-sub">EGP</div>
+      <div class="kpi-delta up">↑ from 20.8B</div>
+    </div>
+    <div class="kpi-item reveal reveal-delay-3">
+      <div class="kpi-label">ROE 2025</div>
+      <div class="kpi-value">26.6%</div>
+      <div class="kpi-sub">Return on equity</div>
+      <div class="kpi-delta up">↑ from 20.7%</div>
+    </div>
+    <div class="kpi-item reveal">
+      <div class="kpi-label">EPS 2025</div>
+      <div class="kpi-value">7.13</div>
+      <div class="kpi-sub">Earnings per share</div>
+      <div class="kpi-delta up">↑ from 5.57</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider" style="margin: 0 auto;"></div>
+
+<!-- LIQUIDITY -->
+<section id="liquidity">
+  <div class="section-divider">
+    <div class="section-divider-num">01</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="section-label">Balance Sheet Analysis</div>
+  <h2 class="section-title reveal">Liquidity Ratios</h2>
+
+  <div class="charts-2col">
+    <div class="chart-card card-3d reveal">
+      <div class="chart-title">Current Ratio</div>
+      <div class="chart-desc">Current Assets / Current Liabilities — ability to meet short-term obligations</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#60A5FA"></div> 2015</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#C9A84C"></div> 2025</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(248,113,113,0.5);border:1px dashed #F87171"></div> Benchmark (1.0)</div>
+      </div>
+      <div style="position:relative;height:260px;">
+        <canvas id="currentRatio" role="img" aria-label="Current ratio comparison bar chart showing 1.3 in 2015 and 1.18 in 2025">Current ratio: 1.3 in 2015, 1.18 in 2025.</canvas>
+      </div>
+      <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.7;">Declined from <span style="color:var(--accent-blue);font-family:'Space Mono',monospace">1.30</span> to <span style="color:var(--gold);font-family:'Space Mono',monospace">1.18</span> — both above the critical 1.0 threshold, indicating acceptable short-term coverage despite the tightening margin.</p>
+      </div>
+    </div>
+
+    <div class="chart-card card-3d reveal reveal-delay-1">
+      <div class="chart-title">Acid-Test (Quick) Ratio</div>
+      <div class="chart-desc">Current Assets − Inventories / Current Liabilities</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#60A5FA"></div> 2015</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#C9A84C"></div> 2025</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(248,113,113,0.5);border:1px dashed #F87171"></div> Benchmark (1.0)</div>
+      </div>
+      <div style="position:relative;height:260px;">
+        <canvas id="acidTest" role="img" aria-label="Acid test ratio bar chart showing 1.02 in 2015 and 0.91 in 2025">Acid-test ratio: 1.02 in 2015, 0.91 in 2025.</canvas>
+      </div>
+      <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.7;">Dropped below 1.0 in 2025 — from <span style="color:var(--accent-blue);font-family:'Space Mono',monospace">1.02</span> to <span style="color:var(--accent-red);font-family:'Space Mono',monospace">0.91</span> — signaling increased reliance on inventory liquidation to cover immediate obligations.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liquidity Progress Bars -->
+  <div class="chart-card reveal" style="margin-top:0;">
+    <div class="chart-title">Liquidity Position — Visual Comparison</div>
+    <div class="chart-desc">Ratio values relative to the 1.0 safe threshold</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-top:1.5rem;">
+      <div>
+        <div style="font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent-blue);margin-bottom:1rem;">2015</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-header">
+            <span class="progress-label">Current Ratio</span>
+            <span class="progress-val" style="color:var(--accent-blue)">1.30</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" data-width="65" style="background:linear-gradient(90deg,#3B6BD8,#60A5FA);"></div>
+          </div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-header">
+            <span class="progress-label">Acid-Test Ratio</span>
+            <span class="progress-val" style="color:var(--accent-blue)">1.02</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" data-width="51" style="background:linear-gradient(90deg,#3B6BD8,#60A5FA);"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">2025</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-header">
+            <span class="progress-label">Current Ratio</span>
+            <span class="progress-val" style="color:var(--gold)">1.18</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" data-width="59" style="background:linear-gradient(90deg,var(--gold-dim),var(--gold));"></div>
+          </div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-header">
+            <span class="progress-label">Acid-Test Ratio</span>
+            <span class="progress-val" style="color:var(--accent-red)">0.91</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" data-width="45" style="background:linear-gradient(90deg,#A32D2D,#F87171);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LEVERAGE -->
+<section id="leverage">
+  <div class="section-divider">
+    <div class="section-divider-num">02</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="section-label">Balance Sheet Analysis</div>
+  <h2 class="section-title reveal">Financial Leverage</h2>
+
+  <div class="charts-3col">
+    <div class="chart-card card-3d reveal">
+      <div class="chart-title">Debt-to-Equity</div>
+      <div class="chart-desc">Total Liabilities / Shareholders' Equity</div>
+      <div style="position:relative;height:220px;">
+        <canvas id="debtEquity" role="img" aria-label="Debt to equity ratio: 2.18 in 2015, 3.32 in 2025">Debt-to-equity: 2.18 in 2015, 3.32 in 2025.</canvas>
+      </div>
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:12px;color:var(--text-dim);">
+        ↑ 52% increase — higher reliance on debt financing
+      </div>
+    </div>
+
+    <div class="chart-card card-3d reveal reveal-delay-1">
+      <div class="chart-title">Debt-to-Total Assets</div>
+      <div class="chart-desc">Total Liabilities / Total Assets</div>
+      <div style="position:relative;height:220px;">
+        <canvas id="debtAssets" role="img" aria-label="Debt to total assets: 0.68 in 2015, 0.77 in 2025">Debt-to-assets: 0.68 in 2015, 0.77 in 2025.</canvas>
+      </div>
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:12px;color:var(--text-dim);">
+        68% → 76.8% of assets financed by debt
+      </div>
+    </div>
+
+    <div class="chart-card card-3d reveal reveal-delay-2">
+      <div class="chart-title">LT Liabilities / Capitalization</div>
+      <div class="chart-desc">Long-term Debt / (LT Debt + Equity)</div>
+      <div style="position:relative;height:220px;">
+        <canvas id="ltCapital" role="img" aria-label="Long term liabilities to total capitalization: 0.07 in 2015, 0.197 in 2025">LT liabilities/capitalization: 0.07 in 2015, 0.197 in 2025.</canvas>
+      </div>
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:12px;color:var(--text-dim);">
+        7% → 19.7% — still equity-dominant but shifting
+      </div>
+    </div>
+  </div>
+
+  <!-- Capital structure donut charts -->
+  <div class="charts-2col" style="margin-top:0;">
+    <div class="chart-card card-3d reveal">
+      <div class="chart-title">Capital Structure — 2015</div>
+      <div class="chart-desc">Equity vs Debt composition</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#60A5FA"></div> Equity (32%)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#F97316"></div> Debt (68%)</div>
+      </div>
+      <div style="position:relative;height:240px;">
+        <canvas id="capStruct2015" role="img" aria-label="Capital structure 2015 pie chart: 32% equity, 68% debt">Capital structure 2015: 32% equity, 68% debt.</canvas>
+      </div>
+    </div>
+
+    <div class="chart-card card-3d reveal reveal-delay-1">
+      <div class="chart-title">Capital Structure — 2025</div>
+      <div class="chart-desc">Equity vs Debt composition</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#C9A84C"></div> Equity (23.2%)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#F87171"></div> Debt (76.8%)</div>
+      </div>
+      <div style="position:relative;height:240px;">
+        <canvas id="capStruct2025" role="img" aria-label="Capital structure 2025 pie chart: 23.2% equity, 76.8% debt">Capital structure 2025: 23.2% equity, 76.8% debt.</canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- INTEREST COVERAGE -->
+<section style="padding-bottom:0;">
+  <div class="section-divider">
+    <div class="section-divider-num">03</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="section-label">Income Statement Analysis</div>
+  <h2 class="section-title reveal">Interest Coverage</h2>
+
+  <div class="chart-card card-3d reveal">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;">
+      <div>
+        <div class="chart-title">Interest Coverage Ratio</div>
+        <div class="chart-desc">EBIT / Interest Expense — ability to service debt from operations</div>
+        <div style="margin-top:2rem;">
+          <div style="margin-bottom:1.5rem;">
+            <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.5rem;">2015 Ratio</div>
+            <div style="font-family:'Space Mono',monospace;font-size:3rem;font-weight:700;color:var(--accent-blue);line-height:1;">7.3×</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:0.25rem;">Strong — covers interest 7.3 times over</div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.5rem;">2025 Ratio</div>
+            <div style="font-family:'Space Mono',monospace;font-size:3rem;font-weight:700;color:var(--gold);line-height:1;">4.3×</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:0.25rem;">Acceptable — but 41% weaker than 2015</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="position:relative;height:280px;">
+          <canvas id="interestCov" role="img" aria-label="Interest coverage ratio: 7.3 in 2015, 4.3 in 2025">Interest coverage ratio: 7.3 in 2015, 4.3 in 2025.</canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROFITABILITY -->
+<section id="profitability">
+  <div class="section-divider">
+    <div class="section-divider-num">04</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="section-label">Income & Balance Sheet Combined</div>
+  <h2 class="section-title reveal">Profitability Ratios</h2>
+
+  <div class="charts-2col">
+    <div class="chart-card card-3d reveal">
+      <div class="chart-title">Gross & Net Profit Margin</div>
+      <div class="chart-desc">Profit retained per 1 EGP of sales after covering costs</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#60A5FA"></div> 2015</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#C9A84C"></div> 2025</div>
+      </div>
+      <div style="position:relative;height:260px;">
+        <canvas id="profitMargins" role="img" aria-label="Profit margins comparison: gross margin 16.1% vs 14.5%, net margin 6.5% vs 6.8%">Gross margin: 16.1% (2015) vs 14.5% (2025). Net margin: 6.5% (2015) vs 6.8% (2025).</canvas>
+      </div>
+    </div>
+
+    <div class="chart-card card-3d reveal reveal-delay-1">
+      <div class="chart-title">ROA & ROE</div>
+      <div class="chart-desc">Return on assets and return on equity — efficiency of resource utilization</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#60A5FA"></div> 2015</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#C9A84C"></div> 2025</div>
+      </div>
+      <div style="position:relative;height:260px;">
+        <canvas id="roaRoe" role="img" aria-label="ROA and ROE comparison: ROA 6.5% vs 6.16%, ROE 20.7% vs 26.6%">ROA: 6.5% (2015) vs 6.16% (2025). ROE: 20.7% (2015) vs 26.6% (2025).</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full comparison table -->
+  <div class="chart-card reveal" style="margin-top:0;padding:0;overflow:hidden;">
+    <div style="padding:2rem 2.5rem 1rem;">
+      <div class="chart-title">Complete Ratio Summary</div>
+      <div class="chart-desc">All financial ratios side-by-side with trend assessment</div>
+    </div>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Ratio</th>
+          <th>Category</th>
+          <th class="blue-col">2015</th>
+          <th class="gold-col">2025</th>
+          <th>Assessment</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="metric-name">Current Ratio</td>
+          <td style="font-size:12px;color:var(--text-dim)">Liquidity</td>
+          <td class="val-2015">1.30</td>
+          <td class="val-2025">1.18</td>
+          <td><span class="trend-badge mixed">⚠ Slight Decline</span></td>
+        </tr>
+        <tr>
+          <td class="metric-name">Acid-Test Ratio</td>
+          <td style="font-size:12px;color:var(--text-dim)">Liquidity</td>
+          <td class="val-2015">1.02</td>
+          <td class="val-2025">0.91</td>
+          <td><span class="trend-badge declined">↓ Declined</span></td>
+        </tr>
+        <tr>
+          <td class="metric-name">Debt-to-Equity</td>
+          <td style="font-size:12px;color:var(--text-dim)">Leverage</td>
+          <td class="val-2015">2.18</td>
+          <td class="val-2025">3.32</td>
+          <td><span class="trend-badge declined">↑ Higher Risk</span></td>
+        </tr>
+        <tr>
+          <td class="metric-name">Debt-to-Total Assets</td>
+          <td style="font-size:12px;color:var(--text-dim)">Leverage</td>
+          <td class="val-2015">0.68</td>
+          <td class="val-2025">0.77</td>
+          <td><span class="trend-badge declined">↑ Higher Risk</span></td>
+        </tr>
+        <tr>
+          <td class="metric-name">LT Liabilities / Capitalization</td>
+          <td style="font-size:12px;color:var(--text-dim)">Leverage</td>
+          <td class="val-2015">0.07</td>
+          <td class="val-2025">0.197</td>
+          <td><span class="trend-badge mixed">⚠ Shifting</span></td>
+        </tr>
+        <tr>
+          <td class="metric-name">Interest Coverage</td>
+          <td style="font-size:12px;color:var(--text-dim)">Coverage</td>
+          <td class="val-2015">7.3×</td>
+          <td class="val-2025">4.3×</td>
+          <td><span class="trend-badge declined">↓ Weaker</span></td>
+        </tr>
+        <tr>
+          <td class="metric-name">Gross Profit Margin</td>
+          <td style="font-size:12px;color:var(--text-dim)">Profitability</td>
+          <td class="val-2015">16.1%</td>
+          <td class="val-2025">14.5%</td>
+          <td><span class="trend-badge declined">↓ Declined</span></td>
+        </tr>
+        <tr>
+          <td class="metric-name">Net Profit Margin</td>
+          <td style="font-size:12px;color:var(--text-dim)">Profitability</td>
+          <td class="val-2015">6.5%</td>
+          <td class="val-2025">6.8%</td>
+          <td><span class="trend-badge improved">↑ Improved</span></td>
+        </tr>
+        <tr>
+          <td class="metric-name">Return on Assets (ROA)</td>
+          <td style="font-size:12px;color:var(--text-dim)">Profitability</td>
+          <td class="val-2015">6.5%</td>
+          <td class="val-2025">6.16%</td>
+          <td><span class="trend-badge mixed">⚠ Marginal ↓</span></td>
+        </tr>
+        <tr>
+          <td class="metric-name">Return on Equity (ROE)</td>
+          <td style="font-size:12px;color:var(--text-dim)">Profitability</td>
+          <td class="val-2015">20.7%</td>
+          <td class="val-2025">26.6%</td>
+          <td><span class="trend-badge improved">↑ Improved</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- VERDICT -->
+<section id="verdict">
+  <div class="section-divider">
+    <div class="section-divider-num">05</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="section-label">Investment Analysis</div>
+  <h2 class="section-title reveal">Investment Decision</h2>
+
+  <div class="verdict-section reveal">
+    <p style="font-size:16px;color:var(--text-muted);line-height:1.8;max-width:800px;">
+      Based on the financial performance analysis comparing 2015 and 2025, Elsewedy Electric has demonstrated 
+      substantial growth in scale and profitability metrics, yet increased financial risk exposure through 
+      higher leverage and tighter liquidity.
+    </p>
+
+    <div class="verdict-grid">
+      <div class="verdict-card">
+        <h4 class="positive">✦ Strengths</h4>
+        <ul class="verdict-list">
+          <li>ROE improved significantly from 20.7% to 26.6%, delivering stronger shareholder returns</li>
+          <li>Net profit margin slightly improved from 6.5% to 6.8% despite scale expansion</li>
+          <li>Revenue grew over 12× from 20.6B to 281B EGP — massive operational scale-up</li>
+          <li>Both liquidity ratios remain operationally functional (Current Ratio above 1.0)</li>
+          <li>Long-term capital structure still predominantly equity-funded (80.3%)</li>
+        </ul>
+      </div>
+      <div class="verdict-card">
+        <h4 class="negative">✦ Risks & Concerns</h4>
+        <ul class="verdict-list">
+          <li>Acid-test ratio fell below 1.0 (0.91) — reliance on inventory liquidation for short-term obligations</li>
+          <li>Debt-to-equity ratio surged from 2.18 to 3.32 — significantly higher financial leverage</li>
+          <li>Interest coverage weakened from 7.3× to 4.3× — reduced operating income cushion</li>
+          <li>Gross profit margin declined from 16.1% to 14.5% — cost pressure on core operations</li>
+          <li>76.8% of total assets now financed by debt — elevated creditor risk</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="invest-rec">
+      <div class="invest-icon">⚖</div>
+      <div>
+        <div style="font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:0.5rem;">Investment Recommendation</div>
+        <p style="font-size:15px;line-height:1.8;color:var(--text-muted);">
+          <strong style="color:var(--text)">Current shareholders</strong> are advised to <strong style="color:var(--accent-green)">hold</strong> their positions and monitor financial management closely. 
+          <strong style="color:var(--text)">New investors</strong> should <strong style="color:var(--accent-coral)">exercise caution</strong> and await a review of the company's debt financing policy before entering, given the heavy reliance on borrowed funds relative to equity.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spider/Radar chart -->
+  <div class="chart-card card-3d reveal" style="margin-top:2rem;">
+    <div class="chart-title">Overall Performance Radar</div>
+    <div class="chart-desc">Comparative performance across all ratio dimensions (normalized scores)</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(96,165,250,0.7)"></div> 2015</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(201,168,76,0.7)"></div> 2025</div>
+    </div>
+    <div style="position:relative;height:360px;max-width:500px;margin:0 auto;">
+      <canvas id="radarChart" role="img" aria-label="Radar chart comparing 2015 and 2025 performance across liquidity, leverage, coverage, gross margin, net margin, ROA and ROE">Radar chart showing 2015 vs 2025 across multiple financial dimensions.</canvas>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p style="margin-bottom:0.5rem;color:var(--gold-dim);font-size:11px;letter-spacing:0.2em;">ELSEWEDY ELECTRIC · FINANCIAL ECONOMICS PROJECT</p>
+  <p>Cairo University · Faculty of Economics & Political Science · Class of Third Year</p>
+  <p style="margin-top:0.5rem;">Supervised by Dr. Ashraf Samir & Dr. Rania Shukri</p>
+</footer>
+
+<script>
+  // ─── NAV SHOW ON SCROLL ───
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('visible', window.scrollY > window.innerHeight * 0.5);
+  });
+
+  // ─── REVEAL ON SCROLL ───
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+
+  // ─── PROGRESS BARS ───
+  const progObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.progress-fill').forEach(fill => {
+          fill.style.width = fill.dataset.width + '%';
+        });
+      }
+    });
+  }, { threshold: 0.2 });
+  document.querySelectorAll('.chart-card').forEach(c => progObserver.observe(c));
+
+  // ─── CHART DEFAULTS ───
+  const BLUE = '#60A5FA';
+  const GOLD = '#C9A84C';
+  const CORAL = '#F97316';
+  const RED = '#F87171';
+  const GREEN = '#4ADE80';
+
+  const gridColor = 'rgba(255,255,255,0.06)';
+  const textColor = '#9896A8';
+
+  Chart.defaults.color = textColor;
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+  Chart.defaults.font.size = 12;
+
+  // ─── CURRENT RATIO ───
+  new Chart(document.getElementById('currentRatio'), {
+    type: 'bar',
+    data: {
+      labels: ['2015', '2025'],
+      datasets: [{
+        label: 'Current Ratio',
+        data: [1.3, 1.18],
+        backgroundColor: [BLUE + 'CC', GOLD + 'CC'],
+        borderColor: [BLUE, GOLD],
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        annotation: { annotations: { line1: { type: 'line', yMin: 1, yMax: 1, borderColor: RED + '80', borderWidth: 1, borderDash: [6,3] } } }
+      },
+      scales: {
+        y: { min: 0, max: 1.6, grid: { color: gridColor }, ticks: { callback: v => v.toFixed(1) } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // ─── ACID TEST ───
+  new Chart(document.getElementById('acidTest'), {
+    type: 'bar',
+    data: {
+      labels: ['2015', '2025'],
+      datasets: [{
+        label: 'Acid-Test Ratio',
+        data: [1.02, 0.91],
+        backgroundColor: [BLUE + 'CC', RED + 'AA'],
+        borderColor: [BLUE, RED],
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 1.4, grid: { color: gridColor }, ticks: { callback: v => v.toFixed(2) } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // ─── DEBT/EQUITY ───
+  new Chart(document.getElementById('debtEquity'), {
+    type: 'bar',
+    data: {
+      labels: ['2015', '2025'],
+      datasets: [{
+        data: [2.178, 3.32],
+        backgroundColor: [BLUE + 'CC', CORAL + 'CC'],
+        borderColor: [BLUE, CORAL],
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 4.5, grid: { color: gridColor } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // ─── DEBT/ASSETS ───
+  new Chart(document.getElementById('debtAssets'), {
+    type: 'bar',
+    data: {
+      labels: ['2015', '2025'],
+      datasets: [{
+        data: [0.68, 0.768],
+        backgroundColor: [BLUE + 'CC', CORAL + 'CC'],
+        borderColor: [BLUE, CORAL],
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 1, grid: { color: gridColor }, ticks: { callback: v => (v*100).toFixed(0)+'%' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // ─── LT CAPITAL ───
+  new Chart(document.getElementById('ltCapital'), {
+    type: 'bar',
+    data: {
+      labels: ['2015', '2025'],
+      datasets: [{
+        data: [0.07, 0.197],
+        backgroundColor: [BLUE + 'CC', CORAL + 'CC'],
+        borderColor: [BLUE, CORAL],
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 0.3, grid: { color: gridColor }, ticks: { callback: v => (v*100).toFixed(0)+'%' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // ─── CAP STRUCTURE DONUTS ───
+  new Chart(document.getElementById('capStruct2015'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Equity', 'Debt'],
+      datasets: [{
+        data: [32, 68],
+        backgroundColor: [BLUE + 'CC', CORAL + '99'],
+        borderColor: ['#1A1A26'],
+        borderWidth: 3,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.raw + '%' } }
+      },
+      cutout: '65%'
+    }
+  });
+
+  new Chart(document.getElementById('capStruct2025'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Equity', 'Debt'],
+      datasets: [{
+        data: [23.2, 76.8],
+        backgroundColor: [GOLD + 'CC', RED + '99'],
+        borderColor: ['#1A1A26'],
+        borderWidth: 3,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.raw + '%' } }
+      },
+      cutout: '65%'
+    }
+  });
+
+  // ─── INTEREST COVERAGE ───
+  new Chart(document.getElementById('interestCov'), {
+    type: 'bar',
+    data: {
+      labels: ['2015', '2025'],
+      datasets: [{
+        label: 'Coverage Ratio (×)',
+        data: [7.3, 4.3],
+        backgroundColor: [BLUE + 'CC', GOLD + 'CC'],
+        borderColor: [BLUE, GOLD],
+        borderWidth: 1.5,
+        borderRadius: 8,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 9, grid: { color: gridColor }, ticks: { callback: v => v + '×' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // ─── PROFIT MARGINS ───
+  new Chart(document.getElementById('profitMargins'), {
+    type: 'bar',
+    data: {
+      labels: ['Gross Profit Margin', 'Net Profit Margin'],
+      datasets: [
+        {
+          label: '2015',
+          data: [16.1, 6.5],
+          backgroundColor: BLUE + 'CC',
+          borderColor: BLUE,
+          borderWidth: 1.5,
+          borderRadius: 5,
+        },
+        {
+          label: '2025',
+          data: [14.5, 6.8],
+          backgroundColor: GOLD + 'CC',
+          borderColor: GOLD,
+          borderWidth: 1.5,
+          borderRadius: 5,
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 22, grid: { color: gridColor }, ticks: { callback: v => v + '%' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // ─── ROA / ROE ───
+  new Chart(document.getElementById('roaRoe'), {
+    type: 'bar',
+    data: {
+      labels: ['ROA', 'ROE'],
+      datasets: [
+        {
+          label: '2015',
+          data: [6.5, 20.7],
+          backgroundColor: BLUE + 'CC',
+          borderColor: BLUE,
+          borderWidth: 1.5,
+          borderRadius: 5,
+        },
+        {
+          label: '2025',
+          data: [6.16, 26.6],
+          backgroundColor: GOLD + 'CC',
+          borderColor: GOLD,
+          borderWidth: 1.5,
+          borderRadius: 5,
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 32, grid: { color: gridColor }, ticks: { callback: v => v + '%' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // ─── RADAR ───
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Liquidity\n(Current)', 'Liquidity\n(Quick)', 'Leverage\n(D/E inv)', 'Coverage', 'Gross Margin', 'Net Margin', 'ROA', 'ROE'],
+      datasets: [
+        {
+          label: '2015',
+          data: [65, 51, 55, 81, 73, 50, 65, 52],
+          backgroundColor: BLUE + '33',
+          borderColor: BLUE,
+          borderWidth: 2,
+          pointBackgroundColor: BLUE,
+          pointRadius: 4,
+        },
+        {
+          label: '2025',
+          data: [59, 46, 36, 48, 66, 52, 62, 67],
+          backgroundColor: GOLD + '33',
+          borderColor: GOLD,
+          borderWidth: 2,
+          pointBackgroundColor: GOLD,
+          pointRadius: 4,
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          grid: { color: gridColor },
+          angleLines: { color: gridColor },
+          ticks: { display: false },
+          pointLabels: { font: { size: 11 }, color: textColor }
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html>
